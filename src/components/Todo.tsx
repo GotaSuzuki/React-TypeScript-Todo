@@ -1,10 +1,55 @@
 import { useState } from "react";
 import { TodoType } from "../types/Todo";
 
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import TextField from "@mui/material/TextField";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import { styled } from "@mui/material/styles";
+
 type TodoProps = {
   todos: TodoType[];
   setTodos: React.Dispatch<React.SetStateAction<TodoType[]>>;
 };
+
+const TodoWrapper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  marginTop: theme.spacing(3),
+  backgroundColor: "#f5f5f5"
+}));
+
+const TodoList = styled(List)({
+  width: "100%"
+});
+
+const TodoItem = styled(ListItem)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  marginBottom: theme.spacing(1),
+  padding: theme.spacing(1),
+  backgroundColor: "#ffffff",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+}));
+
+const TodoText = styled(Typography)<{ isDone: boolean }>(({ isDone }) => ({
+  flexGrow: 1,
+  marginLeft: "10px",
+  textDecoration: isDone ? "line-through" : "none",
+  color: isDone ? "#888" : "inherit"
+}));
+
+const ButtonGroup = styled("div")(({ theme }) => ({
+  display: "flex",
+  gap: theme.spacing(1)
+}));
+
+const DeleteAllButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(2)
+}));
 
 const Todo = ({ todos, setTodos }: TodoProps) => {
   const [editId, setEditId] = useState<string | null>(null);
@@ -42,46 +87,64 @@ const Todo = ({ todos, setTodos }: TodoProps) => {
   };
 
   return (
-    <div>
-      {todos.map((todo) => (
-        <ul key={todo.id}>
-          <li style={{ listStyle: "none" }}>
-            <input
-              type="checkbox"
+    <TodoWrapper>
+      <TodoList>
+        {todos.map((todo) => (
+          <TodoItem key={todo.id}>
+            <Checkbox
               checked={todo.isDone}
               onClick={() => toggleTodo(todo.id)}
             />
             {editId === todo.id ? (
               <>
-                <input
+                <TextField
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
+                  size="small"
+                  fullWidth
                 />
-                <button disabled>削除</button>
-                <button onClick={() => saveEdit(todo.id)}>完了</button>
+                <ButtonGroup>
+                  <Button
+                    onClick={() => saveEdit(todo.id)}
+                    variant="contained"
+                    size="small">
+                    完了
+                  </Button>
+                </ButtonGroup>
               </>
             ) : (
               <>
-                {todo.title}
-                <button
-                  onClick={() => deleteTodo(todo.id)}
-                  disabled={!todo.isDone}>
-                  削除
-                </button>
-                <button onClick={() => startEditing(todo.id, todo.title)}>
-                  編集
-                </button>
+                <TodoText isDone={todo.isDone}>{todo.title}</TodoText>
+                <ButtonGroup>
+                  <Button
+                    onClick={() => deleteTodo(todo.id)}
+                    disabled={!todo.isDone}
+                    variant="outlined"
+                    color="error"
+                    size="small">
+                    削除
+                  </Button>
+                  <Button
+                    onClick={() => startEditing(todo.id, todo.title)}
+                    variant="contained"
+                    color="primary"
+                    size="small">
+                    編集
+                  </Button>
+                </ButtonGroup>
               </>
             )}
-          </li>
-        </ul>
-      ))}
-      <button
+          </TodoItem>
+        ))}
+      </TodoList>
+      <DeleteAllButton
         onClick={() => allDelete()}
-        disabled={todos.filter((todo) => todo.isDone).length === 0}>
-        一括削除
-      </button>
-    </div>
+        disabled={todos.filter((todo) => todo.isDone).length === 0}
+        variant="contained"
+        color="secondary">
+        完了したタスクを一括削除
+      </DeleteAllButton>
+    </TodoWrapper>
   );
 };
 
